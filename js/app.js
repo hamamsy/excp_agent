@@ -1498,13 +1498,16 @@
               <span class="badge badge-high">${job.priority} Priority</span>
             </div>
           </div>
-          <div class="funnel-stats">
-            <span class="funnel-stat hired">Hired: ${jobTotals.filled}</span>
-            <span class="funnel-stat pipeline">In pipeline: ${hiringRequests.reduce((s,h)=>{
-              const a = getHiringRequestAssignments(h.id);
-              return s + Object.entries(a).reduce((n,[k,arr])=> k!=='Placed'&&k!=='Rejected' ? n+(arr?.length||0) : n, 0);
-            },0)}</span>
-            <span class="funnel-stat dropped">Dropped: ${hiringRequests.reduce((s,h)=>(s+(getHiringRequestAssignments(h.id)['Rejected']||[]).length),0)}</span>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div class="funnel-stats">
+              <span class="funnel-stat hired">Hired: ${jobTotals.filled}</span>
+              <span class="funnel-stat pipeline">In pipeline: ${hiringRequests.reduce((s,h)=>{
+                const a = getHiringRequestAssignments(h.id);
+                return s + Object.entries(a).reduce((n,[k,arr])=> k!=='Placed'&&k!=='Rejected' ? n+(arr?.length||0) : n, 0);
+              },0)}</span>
+              <span class="funnel-stat dropped">Dropped: ${hiringRequests.reduce((s,h)=>(s+(getHiringRequestAssignments(h.id)['Rejected']||[]).length),0)}</span>
+            </div>
+            ${hiringRequests.length ? `<button class="btn btn-primary" onclick="app.openAssignCandidateModal('${jobId}','${hrId}')"><i class="fas fa-user-plus"></i> Assign</button>` : ''}
           </div>
         </div>
       </div>
@@ -4011,16 +4014,7 @@
           </ul>
         </section>
         <section class="guide-section">
-          <h2>10. Taeed (MOL Support)</h2>
-          <p><em>Admin only.</em></p>
-          <ul>
-            <li>List of Taeed records. Click <strong>Open</strong> to view a Taeed: dashboard by profession, header form, and details table.</li>
-            <li>Click a detail row or <strong>Edit</strong> to open the detail form in a new page. The detail dashboard (VISA INFORMATION) appears at the top.</li>
-            <li><strong>Dashboard</strong> button shows the Visa status dashboard inline without opening the form page.</li>
-          </ul>
-        </section>
-        <section class="guide-section">
-          <h2>11. Issued Visa</h2>
+          <h2>10. Issued Visa</h2>
           <p><em>Admin only.</em></p>
           <ul>
             <li>List of Issued Visa headers. Click <strong>Open</strong> to view header, dashboard, and details.</li>
@@ -4029,7 +4023,7 @@
           </ul>
         </section>
         <section class="guide-section">
-          <h2>12. Reports & Settings</h2>
+          <h2>11. Reports & Settings</h2>
           <ul>
             <li><strong>Reports:</strong> Jobs, candidates, placements, hiring requests, authorizations. Agent performance summary. Data validation status.</li>
             <li><strong>Hiring Stages:</strong> Admin configures target days per stage for KPI calculations.</li>
@@ -4994,6 +4988,52 @@
     }
   }
 
+  function openAssignCandidateModal(jobId, selectedHrId) {
+    const hiringRequests = getJobHiringRequests(jobId).filter(hr => hrBelongsToCurrentAgent(hr));
+    const unassigned = getVisibleCandidates().filter(c => !getCandidateActiveAssignment(c.id));
+    const job = mockJobs.find(j => j.id === jobId);
+    modalOverlay.classList.remove('hidden');
+    const selHr = selectedHrId || hiringRequests[0]?.id;
+    modalContent.innerHTML = `
+      <div class="modal-header">Assign unassigned candidate to hiring request</div>
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label>1. Select hiring request</label>
+          <select id="assignModalHrSelect" style="width:100%;max-width:300px;padding:0.5rem;font-size:1rem;" onchange="app.openAssignCandidateModal('${jobId}', this.value)">
+            ${hiringRequests.map(h => `<option value="${h.id}" ${h.id === selHr ? 'selected' : ''}>${h.number} - ${h.assignedAgentName} (${h.filled}/${h.required})</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>2. Select candidate to assign</label>
+          <p class="text-muted" style="margin-bottom:0.75rem;">${unassigned.length ? 'Click Assign on a candidate card.' : 'No unassigned candidates.'}</p>
+        </div>
+        ${unassigned.length ? `
+          <div class="assign-candidate-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;">
+            ${unassigned.map(c => `
+              <div class="assign-cand-card" style="border:1px solid var(--border,#e4e8ed);border-radius:8px;padding:1rem;background:#fff;display:flex;flex-direction:column;gap:0.75rem;">
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                  <span class="avatar" style="width:44px;height:44px;font-size:1rem;">${c.avatar || (c.name || '').slice(0,2) || '?'}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;">${(c.name || '').replace(/</g, '&lt;')}</div>
+                    <div style="font-size:0.85rem;color:var(--text-muted);">${(c.title || '-').replace(/</g, '&lt;')} · ${(c.nationality || '').replace(/</g, '&lt;')}</div>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="width:100%;" onclick="app.assignAndCloseAssignModal('${selHr}','${c.id}','${jobId}')"><i class="fas fa-plus"></i> Assign</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        <div style="margin-top:1.25rem;"><button type="button" class="btn btn-ghost" onclick="document.getElementById(\'modalOverlay\').classList.add(\'hidden\')">Close</button></div>
+      </div>
+    `;
+  }
+
+  function assignAndCloseAssignModal(hrId, candidateId, jobId) {
+    assignToHiringRequest(hrId, candidateId);
+    modalOverlay.classList.add('hidden');
+    renderJobProfile(jobId, hrId);
+  }
+
   function showJobHr(jobId, hrId) {
     setActiveNav('jobs');
     renderJobProfile(jobId, hrId);
@@ -5465,6 +5505,8 @@
     submitCreateClient,
     renderMatchesView: (jobId) => renderMatches(jobId),
     assignToHiringRequest,
+    openAssignCandidateModal,
+    assignAndCloseAssignModal,
     openAddHiringRequest,
     submitAddHiringRequest,
     openEditHiringRequest,
