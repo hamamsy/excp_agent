@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EXCP Agent HR - Agent Recruitment Portal</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-fallback"><span class="logo-icon">EXCP</span><span class="logo-text">Agent HR</span></div>
+        <h1>Sign in</h1>
+        <p>Enter your credentials to access the portal</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="admin@test.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      </form>
+      <div class="login-hint">
+        <p><strong>Test users:</strong></p>
+        <p>Admin: admin@test.com / 123</p>
+        <p>Philippines: agent1@test.com (Sara), agent2@test.com (Rosa)</p>
+        <p>India: agent3@test.com (Vikram), agent4@test.com (Priya)</p>
+        <p>Kenya: agent5@test.com (Joseph) — all passwords: 123</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App (shown after login) -->
+  <div id="appScreen" class="app hidden">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <img src="assets/logo.png" alt="EXCP Agent HR" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="logo-fallback" style="display:none">
+            <span class="logo-icon">EXCP</span>
+            <span class="logo-text">Agent HR</span>
+          </span>
+        </div>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search by Name, Job, Email or Client" id="globalSearch">
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-create" id="btnQuickCreate"><i class="fas fa-plus"></i> Create</button>
+        <button class="icon-btn"><i class="fas fa-bell"></i></button>
+        <div class="header-user" id="headerUser">
+          <span class="header-user-name" id="headerUserName">-</span>
+          <span class="header-user-role" id="headerUserRole">-</span>
+          <button class="icon-btn avatar-btn" id="headerAvatar" title="Account"></button>
+          <button class="btn btn-sm btn-logout" id="btnLogout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="main-layout">
+      <!-- Left Sidebar -->
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-view="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </a>
+          <a href="#" class="nav-item" data-view="clients">
+            <i class="fas fa-building"></i>
+            <span>Clients</span>
+          </a>
+          <a href="#" class="nav-item" data-view="agents" data-admin-only>
+            <i class="fas fa-building-user"></i>
+            <span>Agents</span>
+          </a>
+          <a href="#" class="nav-item" data-view="jobs">
+            <i class="fas fa-briefcase"></i>
+            <span>Jobs</span>
+          </a>
+          <div class="nav-sub">
+            <a href="#" class="nav-item nav-sub-item" data-view="authorizations">
+              <i class="fas fa-file-signature"></i>
+              <span>Authorizations</span>
+            </a>
+            <a href="#" class="nav-item nav-sub-item" data-view="hiringRequests">
+              <i class="fas fa-clipboard-list"></i>
+              <span>Hiring Requests</span>
+            </a>
+          </div>
+          <a href="#" class="nav-item" data-view="candidates">
+            <i class="fas fa-users"></i>
+            <span>Candidates</span>
+          </a>
+          <a href="#" class="nav-item" data-view="cvs">
+            <i class="fas fa-file-pdf"></i>
+            <span>CVs</span>
+          </a>
+          <div class="nav-section">Recruitment Center</div>
+          <a href="#" class="nav-item" data-view="matches">
+            <i class="fas fa-handshake"></i>
+            <span>Matches</span>
+          </a>
+          <a href="#" class="nav-item" data-view="placements">
+            <i class="fas fa-user-check"></i>
+            <span>Placements</span>
+          </a>
+          <a href="#" class="nav-item" data-view="activities">
+            <i class="fas fa-calendar-check"></i>
+            <span>Activities</span>
+          </a>
+          <a href="#" class="nav-item" data-view="inbox">
+            <i class="fas fa-inbox"></i>
+            <span>Inbox</span>
+          </a>
+          <a href="#" class="nav-item" data-view="aicenter">
+            <i class="fas fa-robot"></i>
+            <span>AI Center</span>
+          </a>
+          <a href="#" class="nav-item" data-view="sourcing">
+            <i class="fas fa-globe"></i>
+            <span>Sourcing Hub</span>
+          </a>
+          <div class="nav-section" data-admin-only> Administration</div>
+          <a href="#" class="nav-item" data-view="taeed" data-admin-only>
+            <i class="fas fa-file-contract"></i>
+            <span>Taeed (MOL Support)</span>
+          </a>
+          <a href="#" class="nav-item" data-view="issuedVisa" data-admin-only>
+            <i class="fas fa-passport"></i>
+            <span>Issued Visa</span>
+          </a>
+          <a href="#" class="nav-item" data-view="users" data-admin-only>
+            <i class="fas fa-user-cog"></i>
+            <span>Users</span>
+          </a>
+          <div class="nav-section">Settings & Analytics</div>
+          <a href="#" class="nav-item" data-view="userGuide">
+            <i class="fas fa-book"></i>
+            <span>User Guide</span>
+          </a>
+          <a href="#" class="nav-item" data-view="reports">
+            <i class="fas fa-chart-bar"></i>
+            <span>Reports</span>
+          </a>
+          <a href="#" class="nav-item" data-view="hiringStagesSettings" data-admin-only>
+            <i class="fas fa-list-check"></i>
+            <span>Hiring Stages</span>
+          </a>
+          <a href="#" class="nav-item" data-view="settings">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="content" id="mainContent">
+        <!-- Views are injected here by JS -->
+        <div id="viewContainer"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div id="modalContent" class="modal-content"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
